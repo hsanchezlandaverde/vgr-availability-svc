@@ -1,6 +1,8 @@
 from typing import List
+import psycopg2
+from psycopg2 import Error
 
-class AvailabilitiesRepository:
+class AvailabilitiesInMemoryRepository:
 
 	def __init__(self):
 		self.__availabilities = [
@@ -10,8 +12,9 @@ class AvailabilitiesRepository:
 			{"id": 4, "name": "Lost"},
 			{"id": 5, "name": "Sold"},
 		]
+		print("using In-Memory repository")
 
-	def list(self) -> List:
+	def findAll(self) -> List:
 		return self.__availabilities
 
 	def findByID(self, id) -> dict:
@@ -36,3 +39,55 @@ class AvailabilitiesRepository:
 			if availability['id'] == id:
 				del self.__availabilities[index]
 				return
+
+class AvailabilitiesSQLRepository:
+
+	__FIND_ALL_QUERY = "SELECT id, name FROM availabilities ORDER BY id ASC"
+	__FIND_BY_ID_QUERY = "SELECT id, name FROM availabilities WHERE id = %d"
+	__CREATE_QUERY = "INSERT INTO availabilities (name) VALUES ('%s') RETURNING id;"
+	__DELETE_BY_ID_QUERY = "DELETE FROM availabilities WHERE id = %d"
+	__UPDATE_QUERY = "UPDATE availabilities SET name = '%s' WHERE id = %d"
+
+	def __init__(self, config):
+		try:
+			self.connection = psycopg2.connect(host=config.db_host, port=config.db_port,
+			database=config.db_name, user=config.db_user, password=config.db_password)
+			self.cursor = self.connection.cursor()
+			print(self.connection.get_dsn_parameters())
+			self.cursor.execute("SELECT version();")
+			record = self.cursor.fetchone()
+			print("connected to - ", record)
+		except (Exception, Error) as error:
+			print("error while connecting to PostgreSQL", error)
+		print("using PostgreSQL database for repository")
+
+	def findAll(self) -> List:
+		self.cursor.execute(self.__FIND_ALL_QUERY)
+		records = self.cursor.fetchall()
+		list = []
+		for record in records:
+			list.append({"id": record[0], "name": record[1]})
+		return list
+
+	def findByID(self, id) -> dict:
+		self.cursor.execute(self.__FIND_BY_ID_QUERY % id)
+		record = self.cursor.fetchone()
+		if record == None:
+			return {}
+		return {"id": record[0], "name": record[1]}
+
+	def create(self, name: str) -> int:
+		self.cursor.execute(self.__CREATE_QUERY % name)
+		record = self.cursor.fetchone()
+		self.connection.commit()
+		return record[0]
+
+	def update(self, id, name) -> dict:
+		self.cursor.execute(self.__UPDATE_QUERY % (name, id))
+		self.connection.commit()
+		return self.findByID(id)
+
+	def delete(self, id):
+		deleted_record = self.findByID(id)
+		self.cursor.execute(self.__DELETE_BY_ID_QUERY % id)
+		return deleted_record

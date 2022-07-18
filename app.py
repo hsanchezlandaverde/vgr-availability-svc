@@ -2,13 +2,16 @@ from flask import Flask, abort, request
 from configuration import Configuration
 from req_utils import GET_METHOD, PUT_METHOD, POST_METHOD, DELETE_METHOD
 from res_utils import *
-from repository import AvailabilitiesRepository
+from repository import AvailabilitiesInMemoryRepository, AvailabilitiesSQLRepository
 from validator import Validator
 
 config = Configuration().fromEnv()
-app = Flask(config.app_name)
-repository = AvailabilitiesRepository()
+print(config)
+repository = AvailabilitiesInMemoryRepository()
+if config.isDatabaseConfigured():
+	repository = AvailabilitiesSQLRepository(config)
 valid = Validator()
+app = Flask(config.app_name)
 
 # @TODO check for https://github.com/sanjan/flask_swagger
 
@@ -16,14 +19,14 @@ valid = Validator()
 # Gets all the existing availabilities.
 # @version 1.0
 @app.route('/availabilities', methods=[GET_METHOD])
-def readAll():
-	return ok(repository.list())
+def getAll():
+	return ok(repository.findAll())
 
 # GET /availabilities/<id>
 # Get an availability by its ID.
 # @version 1.0
 @app.route('/availabilities/<int:id>', methods=[GET_METHOD])
-def readById(id):
+def getById(id):
 	if not valid.id(id):
 		return badRequest(INVALID_ID_COPY)
 	availability = repository.findByID(id)
@@ -73,4 +76,4 @@ def deleteById(id):
 if __name__ == '__main__':
 	app.register_error_handler(HTTP_NOT_FOUND, notFoundHandler)
 	app.register_error_handler(HTTP_INTERNAL_SERVER_ERROR, internalServerErrorHandler)
-	app.run(host=config.host, port=config.port, debug=config.debug)
+	app.run(host=config.server_host, port=config.server_port, debug=config.server_debug)
