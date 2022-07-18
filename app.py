@@ -1,14 +1,16 @@
 from flask import Flask, abort, request
 from configuration import Configuration
-from requests import *
-from responses import *
+from req_utils import GET_METHOD, PUT_METHOD, POST_METHOD, DELETE_METHOD
+from res_utils import *
 from repository import AvailabilitiesRepository
 from validator import Validator
 
-app = Flask(__name__)
-configuration = Configuration().fromEnv()
+config = Configuration().fromEnv()
+app = Flask(config.app_name)
 repository = AvailabilitiesRepository()
 valid = Validator()
+
+# @TODO check for https://github.com/sanjan/flask_swagger
 
 # GET /availabilities
 # Gets all the existing availabilities.
@@ -18,7 +20,7 @@ def readAll():
 	return ok(repository.list())
 
 # GET /availabilities/<id>
-# Get an availability by its id.
+# Get an availability by its ID.
 # @version 1.0
 @app.route('/availabilities/<int:id>', methods=[GET_METHOD])
 def readById(id):
@@ -41,7 +43,7 @@ def create():
 	return created(next_id)
 
 # PUT /availabilities/<id>
-# Updates an existing availability by its id.
+# Updates an existing availability by its ID.
 # @version 1.0
 @app.route('/availabilities/<int:id>', methods=[PUT_METHOD])
 def update(id):
@@ -56,7 +58,7 @@ def update(id):
 	return ok(availability)
 
 # DELETE /availabilities/<id>
-# Deletes an existing availability by its id.
+# Deletes an existing availability by its ID.
 # @version 1.0
 @app.route('/availabilities/<int:id>', methods=[DELETE_METHOD])
 def deleteById(id):
@@ -71,4 +73,4 @@ def deleteById(id):
 if __name__ == '__main__':
 	app.register_error_handler(HTTP_NOT_FOUND, notFoundHandler)
 	app.register_error_handler(HTTP_INTERNAL_SERVER_ERROR, internalServerErrorHandler)
-	app.run(debug=configuration.debug, port=configuration.port)
+	app.run(host=config.host, port=config.port, debug=config.debug)

@@ -1,16 +1,17 @@
+from typing import List
+
 class AvailabilitiesRepository:
 
 	def __init__(self):
 		self.__availabilities = [
-			{"id": 1, "name": "Ready"},
+			{"id": 1, "name": "Available"},
 			{"id": 2, "name": "Borrowed"},
-			{"id": 3, "name": "Lent"},
-			{"id": 4, "name": "Broken"},
-			{"id": 5, "name": "Lost"},
-			{"id": 6, "name": "Sold"},
+			{"id": 3, "name": "Unavailable"},
+			{"id": 4, "name": "Lost"},
+			{"id": 5, "name": "Sold"},
 		]
 
-	def list(self) -> []:
+	def list(self) -> List:
 		return self.__availabilities
 
 	def findByID(self, id) -> dict:
