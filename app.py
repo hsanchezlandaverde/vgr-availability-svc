@@ -4,13 +4,19 @@ from req_utils import GET_METHOD, PUT_METHOD, POST_METHOD, DELETE_METHOD
 from res_utils import *
 from repository import AvailabilitiesInMemoryRepository, AvailabilitiesSQLRepository
 from validator import Validator
+from log import logger
 
 config = Configuration().fromEnv()
-print(config)
-repository = AvailabilitiesInMemoryRepository()
+logger.debug("using configuration: %s", config)
+repository = {}
 if config.isDatabaseConfigured():
+	logger.debug("Using PostgreSQL database for repository.")
 	repository = AvailabilitiesSQLRepository(config)
+else:
+	logger.warning("Using In-Memory volatile database for repository.")
+	AvailabilitiesInMemoryRepository()
 valid = Validator()
+
 app = Flask(config.app_name)
 
 # @TODO check for https://github.com/sanjan/flask_swagger

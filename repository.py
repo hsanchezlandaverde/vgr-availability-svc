@@ -1,6 +1,7 @@
 from typing import List
 import psycopg2
 from psycopg2 import Error
+from log import logger
 
 class AvailabilitiesInMemoryRepository:
 
@@ -12,7 +13,6 @@ class AvailabilitiesInMemoryRepository:
 			{"id": 4, "name": "Lost"},
 			{"id": 5, "name": "Sold"},
 		]
-		print("using In-Memory repository")
 
 	def findAll(self) -> List:
 		return self.__availabilities
@@ -53,13 +53,12 @@ class AvailabilitiesSQLRepository:
 			self.connection = psycopg2.connect(host=config.db_host, port=config.db_port,
 			database=config.db_name, user=config.db_user, password=config.db_password)
 			self.cursor = self.connection.cursor()
-			print(self.connection.get_dsn_parameters())
+			logger.debug(self.connection.get_dsn_parameters())
 			self.cursor.execute("SELECT version();")
 			record = self.cursor.fetchone()
-			print("connected to - ", record)
+			logger.debug("connected to - %s", record)
 		except (Exception, Error) as error:
-			print("error while connecting to PostgreSQL", error)
-		print("using PostgreSQL database for repository")
+			logger.error("error while connecting to PostgreSQL: %s", error)
 
 	def findAll(self) -> List:
 		self.cursor.execute(self.__FIND_ALL_QUERY)
