@@ -1,7 +1,8 @@
 from typing import List
 import psycopg2
 from psycopg2 import Error
-from log import logger
+from log_utils import logger
+import sys
 
 class AvailabilitiesInMemoryRepository:
 
@@ -40,6 +41,9 @@ class AvailabilitiesInMemoryRepository:
 				del self.__availabilities[index]
 				return
 
+	def __str__(self) -> str:
+		return "in-memory.volatile.database"
+
 class AvailabilitiesSQLRepository:
 
 	__FIND_ALL_QUERY = "SELECT id, name FROM availabilities ORDER BY id ASC"
@@ -59,6 +63,8 @@ class AvailabilitiesSQLRepository:
 			logger.debug("connected to - %s", record)
 		except (Exception, Error) as error:
 			logger.error("error while connecting to PostgreSQL: %s", error)
+			logger.error("service will now exit.")
+			sys.exit(-1)
 
 	def findAll(self) -> List:
 		self.cursor.execute(self.__FIND_ALL_QUERY)
@@ -90,3 +96,6 @@ class AvailabilitiesSQLRepository:
 		deleted_record = self.findByID(id)
 		self.cursor.execute(self.__DELETE_BY_ID_QUERY % id)
 		return deleted_record
+
+	def __str__(self) -> str:
+		return "PostgreSQL"

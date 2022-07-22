@@ -1,13 +1,14 @@
 import os
 
 APP_NAME = "vgr-availability-svc"
+APP_VERSION = "1.1.0"
+
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 8092
 
 class Configuration:
 
   def __init__(self):
-    self.app_name = APP_NAME
     self.server_host = DEFAULT_HOST
     self.server_port = DEFAULT_PORT
     self.server_debug = False

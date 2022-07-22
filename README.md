@@ -4,7 +4,7 @@
 
   - Install Python version `3.8`+
   - Download dependencies with the command `pip install -r requirements.txt`
-  - Configure PostgreSQL database. You can use also a docker image to run the postgres containe. After, you can use [Flyway](https://flywaydb.org/) to run the migrations located under the `./sql` folder.
+  - Configure PostgreSQL database. You can use also a docker image to run the postgres container. After, you can use [Flyway](https://flywaydb.org/) to run the migrations located under the `./sql` folder (please create database before run flyway commands).
   - Configure the next environment variables:
     - `SERVER_HOST` the host address to listen (defaults to 0.0.0.0).
     - `SERVER_PORT` the TCP port to listen (defaults to 8092).

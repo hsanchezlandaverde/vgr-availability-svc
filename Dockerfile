@@ -18,4 +18,4 @@ ENV SERVER_DEBUG=false
 
 EXPOSE 8092
 
-CMD ["python3", "app.py"]
+CMD ["python3", "app"]
