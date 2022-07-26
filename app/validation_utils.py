@@ -13,4 +13,4 @@ class Validator:
 		return id > MIN_ID_VAL
 
 	def __str__(self) -> str:
-		return "Validator::std"
+		return "Validator::Std"

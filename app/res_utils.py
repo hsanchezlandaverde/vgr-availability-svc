@@ -1,8 +1,8 @@
-from flask import jsonify
+from flask import jsonify, Response
 
-INVALID_ID_COPY = "Parameter 'id' must be a positive integer"
-INVALID_NAME_COPY = "Parameter 'name' must be at least 4 characters"
-AVAILABILITY_NOTFOUND_COPY = "No availability found with 'id': %d"
+INVALID_ID_COPY = "Parameter [id] must be a positive integer"
+INVALID_NAME_COPY = "Parameter [name] must be at least 4 characters"
+AVAILABILITY_NOTFOUND_COPY = "No availability found with [id]: %d"
 
 HTTP_OK = 200
 HTTP_CREATED = 201
@@ -11,7 +11,7 @@ HTTP_BAD_REQUEST = 400
 HTTP_NOT_FOUND = 404
 HTTP_INTERNAL_SERVER_ERROR = 500
 
-def ok(obj):
+def ok(obj) -> Response:
 	response = jsonify(obj)
 	response.status_code = HTTP_OK
 	return response
@@ -39,8 +39,8 @@ def internalServerError(message):
 
 def errorResponse(status_code: int, message: str):
 	response = jsonify({
-		'error': {
-			'message': message
+		"error": {
+			"message": message
 		}
 	})
 	response.status_code = status_code

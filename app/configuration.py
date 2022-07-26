@@ -1,7 +1,7 @@
 import os
 
 APP_NAME = "vgr-availability-svc"
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.2.0"
 
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 8092
@@ -45,8 +45,8 @@ class Configuration:
     return self
 
   def isDatabaseConfigured(self) -> bool:
-    return (self.db_host is not None or
-      self.db_port is not None or
-      self.db_name is not None or
-      self.db_user is not None or
+    return (self.db_host is not None and
+      self.db_port is not None and
+      self.db_name is not None and
+      self.db_user is not None and
       self.db_password is not None)

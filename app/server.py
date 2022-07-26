@@ -1,8 +1,8 @@
 from flask import Flask, request
-from configuration import APP_NAME
-from validation_utils import Validator
-from req_utils import GET_METHOD, PUT_METHOD, POST_METHOD, DELETE_METHOD
-from res_utils import *
+from app.configuration import APP_NAME
+from app.validation_utils import Validator
+from app.req_utils import GET_METHOD, PUT_METHOD, POST_METHOD, DELETE_METHOD
+from app.res_utils import *
 
 # @TODO check for https://fastapi.tiangolo.com/tutorial/first-steps/
 
@@ -35,6 +35,8 @@ def create_server(valid: Validator, repository):
 	# @version 1.0
 	@server.route('/availabilities', methods=[POST_METHOD])
 	def create():
+		if request.json == {}:
+			return badRequest(INVALID_NAME_COPY)
 		name = request.json['name']
 		if not valid.name(name):
 			return badRequest(INVALID_NAME_COPY)
@@ -48,12 +50,15 @@ def create_server(valid: Validator, repository):
 	def update(id):
 		if not valid.id(id):
 			return badRequest(INVALID_ID_COPY)
+		availability = repository.findByID(id)
+		if not valid.availability(availability):
+			return notFound(AVAILABILITY_NOTFOUND_COPY % id)
+		if request.json == {}:
+			return badRequest(INVALID_NAME_COPY)
 		name = request.json['name']
 		if not valid.name(name):
 			return badRequest(INVALID_NAME_COPY)
 		availability = repository.update(id, name)
-		if not valid.availability(availability):
-			return notFound(AVAILABILITY_NOTFOUND_COPY % id)
 		return ok(availability)
 
 	# DELETE /availabilities/<id>
@@ -66,7 +71,7 @@ def create_server(valid: Validator, repository):
 		availability = repository.findByID(id)
 		if not valid.availability(availability):
 			return notFound(AVAILABILITY_NOTFOUND_COPY % id)
-		repository.delete(id)
+		repository.delete(id)	
 		return noContent()
 
 	return server

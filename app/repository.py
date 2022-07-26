@@ -1,8 +1,8 @@
 from typing import List
 import psycopg2
 from psycopg2 import Error
-from log_utils import logger
 import sys
+from app.log_utils import logger
 
 class AvailabilitiesInMemoryRepository:
 
@@ -25,7 +25,9 @@ class AvailabilitiesInMemoryRepository:
 		return {}
 
 	def create(self, name: str) -> int:
-		next_id = self.__availabilities[len(self.__availabilities)-1]['id'] + 1
+		next_id = 1
+		if len(self.__availabilities) > 0:
+			next_id = self.__availabilities[len(self.__availabilities)-1]['id'] + 1
 		self.__availabilities.append({"id": next_id, "name": name})
 		return next_id
 
@@ -35,11 +37,15 @@ class AvailabilitiesInMemoryRepository:
 				self.__availabilities[index]['name'] = name
 				return self.__availabilities[index]
 
-	def delete(self, id):
+	def delete(self, id) -> bool:
 		for index, availability in enumerate(self.__availabilities):
 			if availability['id'] == id:
 				del self.__availabilities[index]
 				return
+
+	# made for unit testing
+	def setup(self):
+		self.__availabilities = []
 
 	def __str__(self) -> str:
 		return "in-memory.volatile.database"
@@ -93,9 +99,7 @@ class AvailabilitiesSQLRepository:
 		return self.findByID(id)
 
 	def delete(self, id):
-		deleted_record = self.findByID(id)
 		self.cursor.execute(self.__DELETE_BY_ID_QUERY % id)
-		return deleted_record
 
 	def __str__(self) -> str:
 		return "PostgreSQL"

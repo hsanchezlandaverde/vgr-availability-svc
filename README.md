@@ -17,7 +17,41 @@
   - *NOTE*: If no _`DB_*`_ environment variables are set, the service will run in volatile mode with an in-memory database.
   - Run the command `python app.py`
   - App will run on `http://localhost:8092`
-  - A complete [**swagger.yml**](./docs/swagger.yml) definition is provided to test the available endpoints.
+  - A complete [**swagger.yml**](./docs/swagger.yml) definition is provided to test the available endpoints, you could import it with Insomnia Core or Postman.
+
+## Testing
+
+In order to test, you can install the next packages:
+
+    pip install pytest --user
+    pip install pytest-cov --user
+
+Use the next command to run the unit tests:
+
+    python -m pytest -v
+
+Use the next command to run unit tests with coverage:
+
+    python -m pytest --cov-report term-missing --cov=app tests/
+
+### Coverage
+
+```
+---------------------------------------------
+Name                      Stmts   Miss  Cover
+---------------------------------------------
+app\__init__.py               0      0   100%
+app\__main__.py              16     16     0%
+app\configuration.py         35     15    57%
+app\log_utils.py              9      0   100%
+app\repository.py            79     32    59%
+app\req_utils.py              4      0   100%
+app\res_utils.py             36      2    94% 
+app\server.py                53      0   100%
+app\validation_utils.py      11      0   100%
+---------------------------------------------
+TOTAL                       243     65    73%
+```
 
 ## Docker
 
