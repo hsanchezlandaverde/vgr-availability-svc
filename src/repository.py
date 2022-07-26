@@ -1,8 +1,7 @@
 from typing import List
 import psycopg2
 from psycopg2 import Error
-import sys
-from app.log_utils import logger
+from log_utils import logger
 
 class AvailabilitiesInMemoryRepository:
 
@@ -69,8 +68,6 @@ class AvailabilitiesSQLRepository:
 			logger.debug("connected to - %s", record)
 		except (Exception, Error) as error:
 			logger.error("error while connecting to PostgreSQL: %s", error)
-			logger.error("service will now exit.")
-			sys.exit(-1)
 
 	def findAll(self) -> List:
 		self.cursor.execute(self.__FIND_ALL_QUERY)

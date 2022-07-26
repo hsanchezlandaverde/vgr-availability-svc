@@ -1,0 +1,10 @@
+.coverage
+.git
+.dockerignore
+.gitignore
+.pytest_cache
+Dockerfile
+README.md
+docs
+sql
+*.sh

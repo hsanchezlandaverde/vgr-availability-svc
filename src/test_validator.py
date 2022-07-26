@@ -1,4 +1,4 @@
-from app import validation_utils
+import validation_utils
 
 valid = validation_utils.Validator()
 

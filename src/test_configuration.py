@@ -1,5 +1,4 @@
-import pytest
-from app import configuration
+import configuration
 
 def testInit():
   config = configuration.Configuration()

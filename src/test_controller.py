@@ -1,5 +1,5 @@
 import pytest
-from app import server, validation_utils, repository
+import server, validation_utils, repository
 
 repositoryMock = repository.AvailabilitiesInMemoryRepository()
 

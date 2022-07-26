@@ -1,8 +1,8 @@
 from flask import Flask, request
-from app.configuration import APP_NAME
-from app.validation_utils import Validator
-from app.req_utils import GET_METHOD, PUT_METHOD, POST_METHOD, DELETE_METHOD
-from app.res_utils import *
+from configuration import APP_NAME
+from validation_utils import Validator
+from req_utils import GET_METHOD, PUT_METHOD, POST_METHOD, DELETE_METHOD
+from res_utils import *
 
 # @TODO check for https://fastapi.tiangolo.com/tutorial/first-steps/
 

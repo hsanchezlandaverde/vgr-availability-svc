@@ -2,9 +2,13 @@
 
 FROM python:3.8-slim-buster
 
-WORKDIR /app
+WORKDIR /vgr-availability-svc
 
-COPY . .
+COPY src app
+
+COPY requirements.txt requirements.txt
+
+RUN ls -lha
 
 RUN pip3 install -r requirements.txt
 
