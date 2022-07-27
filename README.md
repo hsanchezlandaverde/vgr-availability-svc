@@ -62,3 +62,9 @@ Build docker image:
 Run docker container:
 
     docker run -d -p 8092:8092 -e DB_HOST="host.docker.internal" -e DB_PORT="" -e DB_NAME="vgr_availability" -e DB_USER="" -e DB_PASSWORD="" --name vgr-availability-svc vgr-availability-svc:latest
+
+## ToDo
+
+- [ ] Add `created_at` and `updated_at` fields to each availability.
+- [ ] Write logs to file in order to troubleshoot.
+- [ ] Check out for **fastAPI** migration.
