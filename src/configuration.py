@@ -1,7 +1,7 @@
 import os
 
 APP_NAME = "vgr-availability-svc"
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.4.0"
 
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 8092

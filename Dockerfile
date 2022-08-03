@@ -8,8 +8,6 @@ COPY src app
 
 COPY requirements.txt requirements.txt
 
-RUN ls -lha
-
 RUN pip3 install -r requirements.txt
 
 ENV FLASK_ENV=development

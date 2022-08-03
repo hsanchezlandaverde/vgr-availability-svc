@@ -1,6 +1,6 @@
 from configuration import Configuration
 from validation_utils import Validator
-from repository import AvailabilitiesInMemoryRepository, AvailabilitiesSQLRepository
+from repository import AvailabilitiesRepository
 from log_utils import logger
 from server import create_server
 
@@ -11,12 +11,12 @@ logger.debug("using configuration: %s", config)
 validator = Validator()
 logger.debug("using validator: %s", validator)
 
-repository = {}
+repository = None
 if config.isDatabaseConfigured():
-  repository = AvailabilitiesSQLRepository(config)
+  repository = AvailabilitiesRepository(config)
+  logger.debug("using repository: %s", repository)
 else:
-  repository = AvailabilitiesInMemoryRepository()
-logger.debug("using repository: %s", repository)
+  logger.error("database not configured.")
 
 server = create_server(validator, repository)
 server.run(host=config.server_host, port=config.server_port, debug=config.server_debug)

@@ -1,7 +1,8 @@
 import pytest
-import server, validation_utils, repository
+import mock
+import server, validation_utils
 
-repositoryMock = repository.AvailabilitiesInMemoryRepository()
+repositoryMock = mock.Mock()
 
 @pytest.fixture()
 def app():
@@ -24,128 +25,100 @@ def testNotFoundHandler(client):
   assert response.status_code == 404
 
 def testGetAll(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
-  repositoryMock.create("Borrowed")
+  repositoryMock.findAll.return_value = [
+    {"id":1,"name":"Available","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"},
+    {"id":2,"name":"Borrowed","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"},
+  ]
   response = client.get("/availabilities")
   assert response.status_code == 200
-  assert response.json == [{"id":1,"name":"Available"},{"id":2,"name":"Borrowed"}]
+  assert response.json == [
+    {"id":1,"name":"Available","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"},
+    {"id":2,"name":"Borrowed","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"},
+  ]
 
 def testGetById_GivenInvalidID_ReturnHTTP400(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
-  repositoryMock.create("Borrowed")
-  repositoryMock.create("Unavailable")
   response = client.get("/availabilities/0")
   assert response.status_code == 400
   assert response.json == {"error":{"message":"Parameter [id] must be a positive integer"}}
 
 def testGetById_WhenNotFound_ReturnHTTP404(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
-  repositoryMock.create("Borrowed")
-  repositoryMock.create("Unavailable")
-  response = client.get("/availabilities/4")
+  repositoryMock.findByID.return_value = {}
+  response = client.get("/availabilities/8")
   assert response.status_code == 404
-  assert response.json == {"error":{"message":"No availability found with [id]: 4"}}
+  assert response.json == {"error":{"message":"No availability found with [id]: 8"}}
 
 def testGetById_WhenFound_ReturnHTTP200(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
-  repositoryMock.create("Borrowed")
-  repositoryMock.create("Unavailable")
+  repositoryMock.findByID.return_value = {"id":2,"name":"Borrowed","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"}
   response = client.get("/availabilities/2")
   assert response.status_code == 200
-  assert response.json == {"id":2,"name":"Borrowed"}
+  assert response.json == {"id":2,"name":"Borrowed","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"}
 
 def testCreate_GivenEmptyInput_ExpectHTTP400(client):
-  repositoryMock.setup()
   response = client.post("/availabilities", json={})
   assert response.status_code == 400
   assert response.json == {"error":{"message":"Parameter [name] must be at least 4 characters"}}
 
 def testCreate_GivenInvalidInput_ExpectHTTP400(client):
-  repositoryMock.setup()
   response = client.post("/availabilities", json={"name":"foo"})
   assert response.status_code == 400
   assert response.json == {"error":{"message":"Parameter [name] must be at least 4 characters"}}
 
 def testCreate_GivenValidInput_ExpectHTTP201(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
+  repositoryMock.create.return_value = 2
   response = client.post("/availabilities", json={"name":"Borrowed"})
   assert response.status_code == 201
   assert response.json == {"availability_id":2}
-  
+
 def testUpdate_GivenInvalidID_ReturnHTTP400(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
-  repositoryMock.create("Borrowed")
-  repositoryMock.create("Unavailable")
   response = client.put("/availabilities/0", json={})
   assert response.status_code == 400
   assert response.json == {"error":{"message":"Parameter [id] must be a positive integer"}}
 
 def testUpdate_WhenNotFound_ReturnHTTP404(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
-  repositoryMock.create("Borrowed")
-  repositoryMock.create("Unavailable")
-  response = client.put("/availabilities/4", json={})
+  repositoryMock.findByID.return_value = {}
+  response = client.put("/availabilities/8", json={})
   assert response.status_code == 404
-  assert response.json == {"error":{"message":"No availability found with [id]: 4"}}
+  assert response.json == {"error":{"message":"No availability found with [id]: 8"}}
 
 def testUpdate_GivenEmptyInput_ExpectHTTP400(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
-  repositoryMock.create("Borrowed")
-  repositoryMock.create("Pending...")
+  repositoryMock.findByID.return_value = {"id":4,"name":"Lost","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"}
   response = client.put("/availabilities/3", json={})
   assert response.status_code == 400
   assert response.json == {"error":{"message":"Parameter [name] must be at least 4 characters"}}
 
 def testUpdate_GivenInvalidInput_ExpectHTTP400(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
-  repositoryMock.create("Borrowed")
-  repositoryMock.create("Pending...")
+  repositoryMock.findByID.return_value = {"id":3,"name":"Unavailable","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"}
   response = client.put("/availabilities/3", json={"name": "foo"})
   assert response.status_code == 400
   assert response.json == {"error":{"message":"Parameter [name] must be at least 4 characters"}}
 
-def testUpdate_GivenValidInput_ExpectHTTP200(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
-  repositoryMock.create("Borrowed")
-  repositoryMock.create("Pending...")
+def testUpdate_WhenConflictOccurs_ExpectHTTP409(client):
+  repositoryMock.findByID.return_value = {"id":6,"name":"Pending...","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"}
+  repositoryMock.update.return_value = None
   response = client.put("/availabilities/3", json={"name": "Pending"})
-  assert response.status_code == 200
-  assert response.json == {"id":3,"name":"Pending"}
+  assert response.status_code == 409
 
+def testUpdate_GivenValidInput_ExpectHTTP200(client):
+  repositoryMock.findByID.return_value = {"id":6,"name":"Pending...","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"}
+  repositoryMock.update.return_value = {"id":6,"name":"Pending","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"}
+  response = client.put("/availabilities/6", json={"name": "Pending"})
+  assert response.status_code == 200
+  assert response.json == {"id":6,"name":"Pending","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"}
 
 def testDelete_GivenInvalidID_ReturnHTTP400(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
-  repositoryMock.create("Borrowed")
-  repositoryMock.create("Unavailable")
   response = client.delete("/availabilities/0")
   assert response.status_code == 400
   assert response.json == {"error":{"message":"Parameter [id] must be a positive integer"}}
 
 def testDelete_WhenNotFound_ReturnHTTP404(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
-  repositoryMock.create("Borrowed")
-  repositoryMock.create("Unavailable")
-  response = client.delete("/availabilities/4")
+  repositoryMock.findByID.return_value = {}
+  response = client.delete("/availabilities/8")
   assert response.status_code == 404
-  assert response.json == {"error":{"message":"No availability found with [id]: 4"}}
+  assert response.json == {"error":{"message":"No availability found with [id]: 8"}}
 
 def testDelete_WhenSuccessfullyDeleted_ReturnHTTP204(client):
-  repositoryMock.setup()
-  repositoryMock.create("Available")
-  repositoryMock.create("Borrowed")
-  repositoryMock.create("Unavailable")
-  response = client.delete("/availabilities/3")
+  repositoryMock.findByID.return_value = {"id":6,"name":"Pending","created_at":"2022-08-01 12:00:00","updated_at":"2022-08-01 12:00:00"}
+  repositoryMock.delete.return_value = None
+  response = client.delete("/availabilities/6")
   assert response.status_code == 204
   assert response.data == b''
