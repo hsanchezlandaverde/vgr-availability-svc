@@ -67,4 +67,5 @@ Run docker container:
 ## ToDo
 
 - [ ] Write logs to file in order to troubleshoot.
+- [ ] Run flyway migrations with Docker.
 - [ ] Check out for **fastAPI** migration.
